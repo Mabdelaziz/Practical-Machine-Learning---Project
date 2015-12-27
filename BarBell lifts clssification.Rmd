@@ -1,0 +1,181 @@
+---
+title: "Barbell lifts Classification - Project"
+author: "Mohamed Abdelaziz Hassan Galal"
+date: "Sunday, December 27, 2015"
+output:
+  html_document:
+    fig_caption: yes
+    keep_md: yes
+---
+
+## Introduction 
+
+In this project, the goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+The training data for this project are available here: 
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here: 
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har.
+
+# Analysis
+
+## 1. Set the Environemnt and Load data Set of training and testing the ML model.
+
+```{r ,warning=F }
+library(AppliedPredictiveModeling)
+library(caret)
+library("rpart")
+library("rpart.plot")
+library(randomForest)
+````
+
+
+```{r }
+fname.training <- "pml-training.csv"
+fname.testing <- "pml-testing.csv"
+if ( !file.exists(fname.training))
+  {
+  trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+  download.file(trainUrl,fname.training, method="auto" )  
+  }
+if (!file.exists(fname.testing) )
+{
+  testUrl  <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+  download.file(testUrl,fname.testing, method="auto" )   
+}
+
+# read data into R data frames.
+df_training <- read.csv(fname.training, na.strings=c("NA","","<NA>"), header=TRUE)
+cnames_train <- colnames(df_training)
+df_testing <- read.csv(fname.testing, na.strings=c("NA","","<NA>"), header=TRUE)
+cnames_test <- colnames(df_testing)
+````
+
+##2. Preprocessing training data.
+
+Here we are aiming to remove NAs columns from training data sets. In order to not lose an important feature we set condition on Na ratio which greater than 50% of the training data sample.
+
+```{r }
+nacols<- c(1,2,3,4,5) ## X ,UserName,and Timestamps  Attributes hav no meananing with Prediction Model
+training.size<- nrow (df_training)
+for( i in 1 : ncol(df_training))
+{
+nasum<- sum(is.na(df_training[,i]))
+if (nasum/training.size>.5) { nacols<- cbind( nacols, i) }
+}
+
+
+df_trainv2<- df_training[,-nacols] 
+features_cnt<- ncol(df_trainv2)-1
+df_testingv2 <- df_testing[,-nacols]
+
+```
+
+After removing NA columns which has NA ratio > 50% we currently have `r features_cnt` features.
+We will check if these features contain any Nulls to be mutated with nearest k means values, if any!
+
+```{r }
+sum(is.na(df_trainv2))
+DataNZV <- nearZeroVar(df_trainv2, saveMetrics=TRUE)
+colnames(df_trainv2)
+df_train<- df_trainv2
+```
+
+Features we counted have no missing values. And we can check the variability of each feature using nearZeroVar analysis.
+
+## Exploratory analysis
+The variable classe contains 5 levels. The plot of the outcome variable shows the frequency of each levels in the subTraining data.
+
+```{r }
+g<- ggplot (df_train , aes(classe) )
+g<- g + geom_bar( aes(fill=classe))
+g<- g + ggtitle("Classes Frequencies with in Training Data Set" )
+g
+
+```
+
+## 3. Data Partitioning
+
+```{r }
+
+subindx <- createDataPartition(y =df_train$classe, p=0.75, list=FALSE)
+subTraining <- df_train[subindx, ] 
+subCV <- df_train[-subindx, ]
+```
+
+** Apply Decision Tree model**
+
+```{r}
+
+FitDT <- rpart(classe ~ ., data=subTraining, method="class")
+
+# Perform prediction
+predictDT <- predict(FitDT, subCV, type = "class")
+resDT= (subCV$class==predictDT ) 
+# Plot result
+rpart.plot(FitDT, main="Decision Tree")
+confusionMatrix(predictDT, subCV$classe)
+```
+
+Error of the predection using DT model 
+
+```{r}
+perDT<- table ( resDT)
+errorDT <- perDT[1]/perDT[2]
+perDT
+```
+
+we get error using decision tree model is about`r errorDT*100`%.
+
+** Apply random Forest model**
+
+```{r }
+FitRF <- randomForest(classe ~ ., data=subTraining, method="class")
+predictRF <- predict(FitRF, subCV[,-ncol(subCV)], type = "class")
+resRF= (subCV$class==predictRF ) 
+confusionMatrix(predictRF, subCV$classe)
+```
+
+Error of the predection using random Forest model:
+
+```{r}
+perRF<- table ( resRF)
+errorRF <- perRF[1]/perRF[2]
+perRF
+```
+
+we get error using random Forest model is about`r errorRF*100`%.
+
+
+## Choose Model and apply on test data set
+
+Form above model performance we select random Forest model to be applied on test data set.
+
+```{r}
+df_test<- df_testingv2 
+# Perform prediction on test 
+predictTest <- predict(FitDT, df_test[,-ncol(df_test)], type = "class")
+```
+
+# Write the output of the prediction model
+```{r }
+result <- data.frame(cbind (df_test[,ncol(df_test)] , levels(predictTest) ),stringsAsFactors=T)
+colnames(result)<- c("problem_id" , "Predicted_Calss")
+write.table((result)  ,file ="AllTestCases.txt" ,row.names=FALSE )
+
+# write file per test case on output directory
+write_files = function(results){
+  for(i in 1:length(results)){
+    filename = paste0("submission\\problem_id_",i,".txt")
+    write.table(results[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+write_files(predictTest)
+```
+
+
+
+
