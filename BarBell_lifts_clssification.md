@@ -40,6 +40,10 @@ library(randomForest)
 ## Type rfNews() to see new features/changes/bug fixes.
 ```
 
+```r
+set.seed("1234")
+```
+
 
 
 ```r
@@ -174,33 +178,33 @@ confusionMatrix(predictDT, subCV$classe)
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1245  154   36   53   48
-##          B   47  543   28   60   90
-##          C   16   71  693  119   75
-##          D   73  122   47  538  111
-##          E   14   59   51   34  577
+##          A 1234  171   33   65   51
+##          B   58  584   53   65  104
+##          C   10   60  686  111   75
+##          D   75  101   57  520  102
+##          E   18   33   26   43  569
 ## 
 ## Overall Statistics
-##                                           
-##                Accuracy : 0.7333          
-##                  95% CI : (0.7207, 0.7456)
-##     No Information Rate : 0.2845          
-##     P-Value [Acc > NIR] : < 2.2e-16       
-##                                           
-##                   Kappa : 0.6618          
-##  Mcnemar's Test P-Value : < 2.2e-16       
+##                                        
+##                Accuracy : 0.7327       
+##                  95% CI : (0.72, 0.745)
+##     No Information Rate : 0.2845       
+##     P-Value [Acc > NIR] : < 2.2e-16    
+##                                        
+##                   Kappa : 0.6607       
+##  Mcnemar's Test P-Value : < 2.2e-16    
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.8925   0.5722   0.8105   0.6692   0.6404
-## Specificity            0.9171   0.9431   0.9306   0.9139   0.9605
-## Pos Pred Value         0.8105   0.7070   0.7115   0.6038   0.7850
-## Neg Pred Value         0.9555   0.9018   0.9588   0.9337   0.9223
+## Sensitivity            0.8846   0.6154   0.8023   0.6468   0.6315
+## Specificity            0.9088   0.9292   0.9368   0.9183   0.9700
+## Pos Pred Value         0.7941   0.6759   0.7282   0.6082   0.8258
+## Neg Pred Value         0.9519   0.9097   0.9573   0.9299   0.9212
 ## Prevalence             0.2845   0.1935   0.1743   0.1639   0.1837
-## Detection Rate         0.2539   0.1107   0.1413   0.1097   0.1177
-## Detection Prevalence   0.3132   0.1566   0.1986   0.1817   0.1499
-## Balanced Accuracy      0.9048   0.7576   0.8706   0.7915   0.8005
+## Detection Rate         0.2516   0.1191   0.1399   0.1060   0.1160
+## Detection Prevalence   0.3169   0.1762   0.1921   0.1743   0.1405
+## Balanced Accuracy      0.8967   0.7723   0.8696   0.7825   0.8008
 ```
 
 Error of the predection using DT model 
@@ -215,10 +219,10 @@ perDT
 ```
 ## resDT
 ## FALSE  TRUE 
-##  1308  3596
+##  1311  3593
 ```
 
-we get error using decision tree model is about36.3737486%.
+we get error using decision tree model is about36.4876148%.
 
 ** Apply random Forest model**
 
@@ -236,32 +240,32 @@ confusionMatrix(predictRF, subCV$classe)
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1395    1    0    0    0
-##          B    0  947    2    0    0
-##          C    0    1  853    3    0
-##          D    0    0    0  801    3
-##          E    0    0    0    0  898
+##          B    0  948    5    0    0
+##          C    0    0  850    5    0
+##          D    0    0    0  799    0
+##          E    0    0    0    0  901
 ## 
 ## Overall Statistics
 ##                                          
-##                Accuracy : 0.998          
-##                  95% CI : (0.9963, 0.999)
+##                Accuracy : 0.9978         
+##                  95% CI : (0.996, 0.9989)
 ##     No Information Rate : 0.2845         
 ##     P-Value [Acc > NIR] : < 2.2e-16      
 ##                                          
-##                   Kappa : 0.9974         
+##                   Kappa : 0.9972         
 ##  Mcnemar's Test P-Value : NA             
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   0.9979   0.9977   0.9963   0.9967
-## Specificity            0.9997   0.9995   0.9990   0.9993   1.0000
-## Pos Pred Value         0.9993   0.9979   0.9953   0.9963   1.0000
-## Neg Pred Value         1.0000   0.9995   0.9995   0.9993   0.9993
+## Sensitivity            1.0000   0.9989   0.9942   0.9938   1.0000
+## Specificity            0.9997   0.9987   0.9988   1.0000   1.0000
+## Pos Pred Value         0.9993   0.9948   0.9942   1.0000   1.0000
+## Neg Pred Value         1.0000   0.9997   0.9988   0.9988   1.0000
 ## Prevalence             0.2845   0.1935   0.1743   0.1639   0.1837
-## Detection Rate         0.2845   0.1931   0.1739   0.1633   0.1831
-## Detection Prevalence   0.2847   0.1935   0.1748   0.1639   0.1831
-## Balanced Accuracy      0.9999   0.9987   0.9983   0.9978   0.9983
+## Detection Rate         0.2845   0.1933   0.1733   0.1629   0.1837
+## Detection Prevalence   0.2847   0.1943   0.1743   0.1629   0.1837
+## Balanced Accuracy      0.9999   0.9988   0.9965   0.9969   1.0000
 ```
 
 Error of the predection using random Forest model:
@@ -276,10 +280,10 @@ perRF
 ```
 ## resRF
 ## FALSE  TRUE 
-##    10  4894
+##    11  4893
 ```
 
-we get error using random Forest model is about0.2043318%.
+we get error using random Forest model is about0.224811%.
 
 
 ## Choose Model and apply on test data set

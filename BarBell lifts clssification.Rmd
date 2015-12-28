@@ -30,6 +30,7 @@ library(caret)
 library("rpart")
 library("rpart.plot")
 library(randomForest)
+set.seed("1234")
 ````
 
 
